@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Monitor POC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        header {
+            padding: 20px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+            border-bottom: 2px solid #ddd;
+        }
+
+        header.active {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        header.inactive {
+            background-color: #999999;
+            color: white;
+        }
+
+        .status-text {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            margin-top: 8px;
+            opacity: 0.8;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        iframe {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .info-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .info-section h2 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .info-section p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="status-text">INACTIVE</div>
+        <div class="timestamp">Last activity: Never</div>
+    </header>
+
+    <div class="container">
+        <h1>Activity Monitor POC</h1>
+
+        <p style="margin: 20px 0; color: #666;">
+            This page monitors user activity in the iframe below.
+            Try clicking, typing, scrolling, or moving your mouse inside the iframe.
+        </p>
+
+        <!-- The iframe that will detect user events -->
+        <iframe
+            id="activity-iframe"
+            src="data:text/html,
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body {
+                        font-family: sans-serif;
+                        padding: 20px;
+                        background-color: #fafafa;
+                    }
+                    h2 { color: #333; }
+                    p { color: #666; line-height: 1.6; }
+                </style>
+            </head>
+            <body>
+                <h2>Activity Detection Area</h2>
+                <p>Try these actions inside this iframe:</p>
+                <ul>
+                    <li>Click anywhere</li>
+                    <li>Type or press keys</li>
+                    <li>Move your mouse</li>
+                    <li>Scroll the page</li>
+                    <li>Switch tabs (visibility change)</li>
+                </ul>
+                <p style='margin-top: 20px; padding: 10px; background: #e3f2fd; border-radius: 4px;'>
+                    💡 Each action will send a message to the parent page,
+                    which will update the header status.
+                </p>
+                <script src='iframe-messages.js'></script>
+            </body>
+            </html>"
+            sandbox="allow-same-origin allow-scripts"
+        ></iframe>
+
+        <div class="info-section">
+            <h2>How This Works</h2>
+            <p>
+                <strong>Parent Page (this page):</strong> Uses parent-library.js to listen for messages
+                from the iframe and tracks user activity. When activity is detected, the header turns
+                green (ACTIVE). After 15 seconds with no activity, it turns gray (INACTIVE).
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>Iframe:</strong> Uses iframe-messages.js to detect user events
+                (click, keydown, scroll, mousemove, visibilitychange) and sends them to the parent
+                page using window.parent.postMessage().
+            </p>
+        </div>
+    </div>
+
+    <script src="parent-library.js"></script>
+</body>
+</html>
