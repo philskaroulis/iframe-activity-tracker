@@ -90,5 +90,5 @@
     setInactive();
 
     // Optional: Log for debugging
-    console.log('um-library.js loaded - Activity monitor initialized');
+    console.log('parent-library.js loaded - Activity monitor initialized');
 })();

@@ -65,6 +65,6 @@
     });
 
     // Log initialization
-    console.log('oreilly-messages.js loaded - Event listeners attached');
+    console.log('iframe-messages.js loaded - Event listeners attached');
     console.log(`Monitoring events: ${EVENTS_TO_MONITOR.join(', ')}`);
 })();
