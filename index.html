@@ -115,18 +115,16 @@
 
     <script src="parent-library.js"></script>
     <script>
-        // Dynamically create iframe content with embedded script
+        // Dynamically create iframe with content from GitHub
         const iframe = document.getElementById('activity-iframe');
-        const iframeContent = `
-<!DOCTYPE html>
+        const SCRIPT_URL = 'https://raw.githubusercontent.com/philskaroulis/iframe-activity-tracker/refs/heads/main/iframe-messages.js';
+
+        function createIframe() {
+            const iframeHTML = `<!DOCTYPE html>
 <html>
 <head>
     <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            background-color: #fafafa;
-        }
+        body { font-family: sans-serif; padding: 20px; background-color: #fafafa; }
         h2 { color: #333; }
         p { color: #666; line-height: 1.6; }
     </style>
@@ -141,124 +139,40 @@
         <li>Scroll the page</li>
         <li>Switch tabs (visibility change)</li>
     </ul>
-    <p style='margin-top: 20px; padding: 10px; background: #e3f2fd; border-radius: 4px;'>
-        💡 Each action will send a message to the parent page,
-        which will update the header status.
+    <p style="margin-top: 20px; padding: 10px; background: #e3f2fd; border-radius: 4px;">
+        💡 Each action will send a message to the parent page, which will update the header status.
     </p>
-
-    <hr style='margin: 30px 0; border: none; border-top: 1px solid #ddd;'>
-
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
     <h3>📜 Scroll Testing Content</h3>
     <p>This section provides enough content to enable scrolling within the iframe. Try scrolling down to test the scroll event detection!</p>
-
     <p><strong>Section 1:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-
     <p><strong>Section 2:</strong> Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-
     <p><strong>Section 3:</strong> Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-
     <p><strong>Section 4:</strong> Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
-
     <p><strong>Section 5:</strong> Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
-
     <p><strong>Section 6:</strong> At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.</p>
-
     <p><strong>Section 7:</strong> Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.</p>
-
-    <p style='margin-top: 40px; padding: 15px; background: #fff3e0; border-radius: 4px; border-left: 4px solid #ff9800;'>
+    <p style="margin-top: 40px; padding: 15px; background: #fff3e0; border-radius: 4px; border-left: 4px solid #ff9800;">
         🎯 <strong>Scroll down to see all this content and trigger scroll events!</strong>
     </p>
     <script>
-        (function() {
-            'use strict';
-
-            const PARENT_ORIGIN = '*';
-            const MESSAGE_SOURCE = 'vendorname-to-parentname-messages';
-
-            function sendEventToParent(eventType, payload = {}) {
-                try {
-                    window.parent.postMessage(
-                        {
-                            source: MESSAGE_SOURCE,
-                            type: eventType,
-                            timestamp: Date.now(),
-                            ...payload
-                        },
-                        PARENT_ORIGIN
-                    );
-                    console.log(\`[\${MESSAGE_SOURCE}] \${eventType} sent to parent\`, payload);
-                } catch (e) {
-                    console.error('Failed to postMessage to parent:', e);
-                }
-            }
-
-            function throttle(func, limit) {
-                let inThrottle;
-                return function (...args) {
-                    if (!inThrottle) {
-                        func.apply(this, args);
-                        inThrottle = true;
-                        setTimeout(() => (inThrottle = false), limit);
-                    }
-                };
-            }
-
-            window.addEventListener(
-                'click',
-                (e) => {
-                    sendEventToParent('IFRAME_CLICK', {
-                        targetTag: e.target ? e.target.tagName : 'UNKNOWN'
-                    });
-                },
-                { passive: true }
-            );
-
-            window.addEventListener(
-                'keydown',
-                () => {
-                    sendEventToParent('IFRAME_KEYPRESS');
-                },
-                { passive: true }
-            );
-
-            window.addEventListener(
-                'scroll',
-                throttle(() => {
-                    sendEventToParent('IFRAME_SCROLL', {
-                        scrollX: window.scrollX || document.documentElement.scrollLeft,
-                        scrollY: window.scrollY || document.documentElement.scrollTop
-                    });
-                }, 200),
-                { passive: true }
-            );
-
-            window.addEventListener(
-                'mousemove',
-                throttle(() => {
-                    sendEventToParent('IFRAME_MOUSEMOVE');
-                }, 500),
-                { passive: true }
-            );
-
-            document.addEventListener(
-                'visibilitychange',
-                () => {
-                    sendEventToParent('IFRAME_VISIBILITY_CHANGE', {
-                        visibilityState: document.visibilityState
-                    });
-                },
-                { passive: true }
-            );
-
-            console.log(\`[\${MESSAGE_SOURCE}] Event listeners attached\`);
-            console.log(\`[\${MESSAGE_SOURCE}] Monitoring: IFRAME_CLICK, IFRAME_KEYPRESS, IFRAME_SCROLL, IFRAME_MOUSEMOVE, IFRAME_VISIBILITY_CHANGE\`);
-        })();
+        // Fetch and inject the external script
+        fetch('${SCRIPT_URL}')
+            .then(r => r.text())
+            .then(code => {
+                const script = document.createElement('script');
+                script.textContent = code;
+                document.body.appendChild(script);
+                console.log('[iframe] Loaded iframe-messages.js from GitHub');
+            })
+            .catch(e => console.error('[iframe] Failed to load script:', e));
     <\/script>
 </body>
-</html>
-        `;
+</html>`;
+            iframe.src = 'data:text/html;charset=UTF-8,' + encodeURIComponent(iframeHTML);
+        }
 
-        iframe.src = 'data:text/html;charset=UTF-8,' + encodeURIComponent(iframeContent);
+        createIframe();
     </script>
 </body>
 </html>

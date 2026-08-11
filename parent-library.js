@@ -204,9 +204,17 @@
     // ============ MESSAGE PROCESSING ============
     function processMessage(event) {
         try {
+            // Debug: Log all messages received
+            console.log('[Activity Monitor] Message received:', event.data);
+
             // 1. Security: Source validation
-            if (!event.data || event.data.source !== CONFIG.MESSAGE_SOURCE) {
-                log(`Rejected message with invalid source: ${event.data?.source}`);
+            if (!event.data) {
+                console.log('[Activity Monitor] No data in message');
+                return;
+            }
+
+            if (event.data.source !== CONFIG.MESSAGE_SOURCE) {
+                console.log(`[Activity Monitor] Wrong source: ${event.data.source} (expected: ${CONFIG.MESSAGE_SOURCE})`);
                 return;
             }
 
@@ -260,6 +268,7 @@
 
     // ============ INITIALIZATION ============
     window.addEventListener('message', processMessage);
+    console.log('[Activity Monitor] Message listener registered');
 
     // Set initial state
     setInactive();
