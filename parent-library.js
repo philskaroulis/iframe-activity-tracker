@@ -96,14 +96,22 @@
 
     /**
      * Listen for messages from the iframe
-     * The iframe sends: { type: 'activity', timestamp: Date.now() }
      */
     window.addEventListener('message', function(event) {
-        // Security check: only accept messages from iframe sources
-        // In a real app, you'd validate the origin more strictly
-        if (event.data && event.data.type === 'activity') {
-            // Activity detected from iframe - switch to active state
-            setActive();
+        try {
+            // Validate message structure
+            if (!event.data) return;
+            if (event.data.source !== 'vendorname-to-parentname-messages') return;
+
+            const { type, timestamp } = event.data;
+
+            // Handle activity events
+            if (type && type.startsWith('IFRAME_')) {
+                setActive();
+                console.log(`Activity from iframe: ${type}`, event.data);
+            }
+        } catch (e) {
+            console.error('Error processing message from iframe:', e);
         }
     });
 
