@@ -8,7 +8,7 @@
     'use strict';
 
     // Configuration
-    const INACTIVITY_TIMEOUT = 15000; // 15 seconds in milliseconds
+    const INACTIVITY_TIMEOUT = 10000; // 10 seconds in milliseconds
     const ACTIVE_CLASS = 'active';
     const INACTIVE_CLASS = 'inactive';
 
@@ -16,6 +16,7 @@
     const header = document.querySelector('header');
     const statusText = document.querySelector('.status-text');
     const timestamp = document.querySelector('.timestamp');
+    const countdown = document.querySelector('.countdown');
 
     // State
     let lastActivityTime = null;
@@ -32,6 +33,23 @@
             second: '2-digit',
             hour12: true
         });
+    }
+
+    /**
+     * Update the countdown timer display
+     */
+    function updateCountdown() {
+        if (!isActive || !lastActivityTime) {
+            countdown.textContent = 'Next update in: --s';
+            return;
+        }
+
+        const now = Date.now();
+        const elapsed = now - lastActivityTime.getTime();
+        const remainingMs = Math.max(0, INACTIVITY_TIMEOUT - elapsed);
+        const remainingSeconds = (remainingMs / 1000).toFixed(1);
+
+        countdown.textContent = `Next update in: ${remainingSeconds}s`;
     }
 
     /**
@@ -56,6 +74,9 @@
         inactivityTimer = setTimeout(() => {
             setInactive();
         }, INACTIVITY_TIMEOUT);
+
+        // Update countdown immediately
+        updateCountdown();
     }
 
     /**
@@ -88,6 +109,13 @@
 
     // Initialize the page as INACTIVE
     setInactive();
+
+    // Start countdown animation loop
+    function animateCountdown() {
+        updateCountdown();
+        requestAnimationFrame(animateCountdown);
+    }
+    animateCountdown();
 
     // Optional: Log for debugging
     console.log('parent-library.js loaded - Activity monitor initialized');
