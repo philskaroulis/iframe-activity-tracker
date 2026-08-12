@@ -75,13 +75,21 @@
             color: #666;
             line-height: 1.6;
         }
+
+        .countdown {
+            transition: opacity 0.3s ease, color 0.3s ease;
+        }
+
+        .countdown.disabled {
+            opacity: 0.4;
+            color: #ccc;
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="status-text">INACTIVE</div>
-        <div class="timestamp">Last activity: Never</div>
-        <div class="countdown" style="font-size: 12px; margin-top: 5px; opacity: 0.7;">Next update in: --ms</div>
+        <div class="countdown" style="font-size: 16px; font-weight: 600; margin-top: 15px; letter-spacing: 0.5px;">Seconds to INACTIVE: --s</div>
     </header>
 
     <div class="container">

@@ -11,7 +11,7 @@
 
     // ============ CONFIGURATION ============
     const CONFIG = {
-        INACTIVITY_TIMEOUT: 15000,
+        INACTIVITY_TIMEOUT: 10000,
         VENDOR_ORIGIN: '*',
         MESSAGE_SOURCE: 'vendorname-to-parentname-messages',
         DEBUG: false,
@@ -38,7 +38,6 @@
     // Get DOM elements
     const header = document.querySelector('header');
     const statusText = document.querySelector('.status-text');
-    const timestamp = document.querySelector('.timestamp');
     const countdown = document.querySelector('.countdown');
 
     // ============ LOGGING UTILITIES ============
@@ -152,7 +151,7 @@
     // ============ COUNTDOWN DISPLAY ============
     function updateCountdown() {
         if (!isActive || !lastActivityTime) {
-            countdown.textContent = 'Next update in: --s';
+            countdown.textContent = 'Seconds to INACTIVE: --s';
             return;
         }
 
@@ -161,7 +160,7 @@
         const remainingMs = Math.max(0, CONFIG.INACTIVITY_TIMEOUT - elapsed);
         const remainingSeconds = (remainingMs / 1000).toFixed(1);
 
-        countdown.textContent = `Next update in: ${remainingSeconds}s`;
+        countdown.textContent = `Seconds to INACTIVE: ${remainingSeconds}s`;
     }
 
     // ============ ACTIVITY STATE MANAGEMENT ============
@@ -171,9 +170,11 @@
         header.classList.add(ACTIVE_CLASS);
         statusText.textContent = 'ACTIVE';
 
-        // Update timestamp
+        // Show countdown when active
+        countdown.classList.remove('disabled');
+
+        // Track activity time for countdown
         lastActivityTime = new Date();
-        timestamp.textContent = `Last activity: ${formatTime(lastActivityTime)}`;
 
         // Clear any existing inactivity timer
         if (inactivityTimer) {
@@ -194,6 +195,9 @@
         header.classList.remove(ACTIVE_CLASS);
         header.classList.add(INACTIVE_CLASS);
         statusText.textContent = 'INACTIVE';
+
+        // Disable countdown when inactive
+        countdown.classList.add('disabled');
 
         if (inactivityTimer) {
             clearTimeout(inactivityTimer);
@@ -286,8 +290,9 @@
         }
     });
 
-    // Set initial state
+    // Set initial state (INACTIVE with disabled countdown)
     setInactive();
+    countdown.classList.add('disabled');
 
     // Start countdown animation loop
     function animateCountdown() {
