@@ -246,8 +246,13 @@
                 warn(`No handler registered for event type: ${type}`);
             }
 
-            // 7. Trigger activity state change
-            setActive();
+            // 7. Trigger activity state change based on event type
+            // Visibility changes deactivate, all other user actions activate
+            if (type === 'IFRAME_VISIBILITY_CHANGE') {
+                setInactive();
+            } else {
+                setActive();
+            }
 
         } catch (e) {
             error(`Failed to process message from iframe: ${e.message}`);
@@ -269,6 +274,17 @@
     // ============ INITIALIZATION ============
     window.addEventListener('message', processMessage);
     console.log('[Activity Monitor] Message listener registered');
+
+    // Listen for parent window visibility changes (parent losing/gaining focus)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            log('Parent window lost focus - setting INACTIVE');
+            setInactive();
+        } else {
+            log('Parent window regained focus');
+            // Don't automatically set ACTIVE - wait for user activity in iframe
+        }
+    });
 
     // Set initial state
     setInactive();
