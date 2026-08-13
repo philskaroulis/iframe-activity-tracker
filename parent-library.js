@@ -13,7 +13,7 @@
     const CONFIG = {
         INACTIVITY_TIMEOUT: 10000,
         VENDOR_ORIGIN: '*',
-        MESSAGE_SOURCE: 'vendorname-to-parentname-messages',
+        MESSAGE_SOURCE: 'oreilly-metered-iframe',
         DEBUG: false,
         MAX_EVENTS_PER_SECOND: 100,
         MAX_TIMESTAMP_DEVIATION_MS: 5000
@@ -117,23 +117,23 @@
     }
 
     function createDefaultHandlers() {
-        registerEventHandler('IFRAME_CLICK', (details, eventTimestamp) => {
+        registerEventHandler('OREILLY_CLICK_MESSAGE', (details, eventTimestamp) => {
             log(`User clicked on ${details.targetTag || 'UNKNOWN'} element`, { timestamp: eventTimestamp });
         });
 
-        registerEventHandler('IFRAME_KEYPRESS', (details, eventTimestamp) => {
+        registerEventHandler('OREILLY_KEYPRESS_MESSAGE', (details, eventTimestamp) => {
             log(`User typing detected inside iframe`, { timestamp: eventTimestamp });
         });
 
-        registerEventHandler('IFRAME_SCROLL', (details, eventTimestamp) => {
+        registerEventHandler('OREILLY_SCROLL_MESSAGE', (details, eventTimestamp) => {
             log(`User scrolled inside iframe`, { scrollX: details.scrollX, scrollY: details.scrollY, timestamp: eventTimestamp });
         });
 
-        registerEventHandler('IFRAME_MOUSEMOVE', (details, eventTimestamp) => {
+        registerEventHandler('OREILLY_MOUSEMOVE_MESSAGE', (details, eventTimestamp) => {
             log(`Active mouse movement inside iframe`, { timestamp: eventTimestamp });
         });
 
-        registerEventHandler('IFRAME_VISIBILITY_CHANGE', (details, eventTimestamp) => {
+        registerEventHandler('OREILLY_VISIBILITY_CHANGE_MESSAGE', (details, eventTimestamp) => {
             log(`iFrame visibility changed to: ${details.visibilityState}`, { timestamp: eventTimestamp });
         });
     }
@@ -231,7 +231,7 @@
             }
 
             // 4. Event type validation
-            if (!type || !type.startsWith('IFRAME_')) {
+            if (!type || !type.startsWith('OREILLY_')) {
                 warn(`Unknown event type: ${type}`);
                 return;
             }
@@ -252,7 +252,7 @@
 
             // 7. Trigger activity state change based on event type
             // Visibility changes deactivate, all other user actions activate
-            if (type === 'IFRAME_VISIBILITY_CHANGE') {
+            if (type === 'OREILLY_VISIBILITY_CHANGE_MESSAGE') {
                 setInactive();
             } else {
                 setActive();
