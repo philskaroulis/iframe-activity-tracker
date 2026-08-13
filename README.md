@@ -20,6 +20,8 @@ A production-ready activity monitoring system for demonstrating secure message p
 - 🐛 **Debug Mode** — Toggle verbose logging for troubleshooting
 - 🎛️ **Public API** — Runtime configuration and monitoring
 - 📊 **Modular Architecture** — Separate message handling from UI concerns
+- 🔄 **Environment-Based Loading** — Scripts auto-load from correct source (local or GitHub Pages)
+- ✔️ **Version Tracking** — Built-in version verification to detect mismatches
 
 ## Architecture
 
@@ -63,7 +65,33 @@ A production-ready activity monitoring system for demonstrating secure message p
 | **UI** | `ui-manager.js`, `styles.css` | Visual state, countdown, header styling |
 | **Message Handling** | `fake-usage-meter.js` | Validation, security, rate limiting, routing |
 | **Vendor Script** | `messages-from-iframe.min.js` | Event detection, message sending |
-| **Static Content** | `docs/index.html` | Iframe content served from GitHub Pages |
+| **Static Content** | `docs/index.html` | Iframe content served from GitHub Pages or local (depending on environment) |
+
+### Environment-Based Script Loading
+
+Scripts automatically load from the correct source based on deployment environment:
+
+```
+Development (localhost, *.vercel.app)
+    ↓
+  Load iframe from: window.location.origin + '/docs/index.html'
+    ↓
+  Uses local scripts (develop branch)
+
+Production (other domains)
+    ↓
+  Load iframe from: https://philskaroulis.github.io/...
+    ↓
+  Uses GitHub Pages scripts (main branch)
+```
+
+**Version Verification:** After iframe loads, scripts verify versions match:
+```javascript
+Parent version: window.UsageMeter.getVersion()      // → '2.0.0'
+Iframe version: window.IframeMessenger.getVersion() // → '2.0.0'
+```
+
+Logs warning if versions don't match (indicates deployment issue).
 
 ### Message Format
 
@@ -211,6 +239,9 @@ window.UsageMeter.isInitialized();           // Check status
 // Configuration
 window.UsageMeter.setDebug(true);            // Enable/disable debug logging
 window.UsageMeter.setVendorOrigin(url);      // Update trusted vendor origin
+
+// Version verification
+window.UsageMeter.getVersion();              // → '2.0.0'
 ```
 
 **Vendor App (messages-from-iframe.js):**
@@ -220,6 +251,9 @@ window.UsageMeter.setVendorOrigin(url);      // Update trusted vendor origin
 window.IframeMessenger.init();               // Manually initialize
 window.IframeMessenger.cleanup();            // Clean up for unmount
 window.IframeMessenger.isInitialized();      // Check status
+
+// Version verification
+window.IframeMessenger.getVersion();         // → '2.0.0'
 
 // Auto-initializes on load, but can be managed for SPA lifecycle
 ```
@@ -297,6 +331,7 @@ window.parent.postMessage({
 |----------|---------|
 | `HOW_IT_WORKS.md` | Conceptual explanation of cross-origin iframe communication |
 | `IFRAME_ANALYSIS.md` | Security audit identifying weaknesses and improvements |
+| `DEPLOYMENT_STRATEGY.md` | **START HERE** — Environment-based loading, version verification, deployment workflows |
 | `SPA_INTEGRATION.md` | Parent page developers: lifecycle management in React, Vue, Angular |
 | `VENDOR_INTEGRATION.md` | Vendor app developers: lifecycle management in vendor SPAs |
 | `TESTING_GUIDE.md` | Comprehensive testing for cross-origin and multi-iframe scenarios |
@@ -311,36 +346,96 @@ window.parent.postMessage({
    # Then open http://localhost:8000 in your browser
    ```
 
-2. **Interact with the iframe:**
+2. **Verify environment detection:**
+   - Open DevTools (F12)
+   - Check console for:
+     ```
+     [App] Environment: Development
+     [App] Loading iframe from: http://localhost:8000/docs/index.html
+     ```
+   - This confirms local scripts are being loaded
+
+3. **Interact with the iframe:**
    - Click anywhere in the iframe
    - Type or press keys
    - Scroll the content
    - Move your mouse
    - Switch tabs (visibility change)
 
-3. **Watch the header:**
+4. **Watch the header:**
    - Turns **GREEN (ACTIVE)** when you interact
    - Turns **GRAY (INACTIVE)** after 10 seconds with no interaction
    - Countdown timer shows seconds remaining
 
-4. **Inspect message flow:**
-   - Open DevTools (F12)
-   - Run `window.UsageMeter.setDebug(true)`
+5. **Inspect message flow:**
+   - Run `window.UsageMeter.setDebug(true)` in console
    - Interact with iframe to see detailed event logs
+   - Check version match: `window.UsageMeter.getVersion()` should equal `window.IframeMessenger.getVersion()`
 
-### Production Deployment
+## Deployment
 
-The vendor iframe content is served from GitHub Pages:
-```
-https://philskaroulis.github.io/iframe-activity-tracker/index.html
+### How It Works
+
+The app automatically loads scripts from the correct source based on environment:
+
+| Environment | Script Source | Branch |
+|-------------|---------------|--------|
+| `localhost` | Local `/docs/index.html` | develop |
+| `*.vercel.app` (preview) | Local `/docs/index.html` | develop |
+| Other domains | GitHub Pages | main |
+
+**No manual merging needed!** Each branch's code loads scripts from the same branch.
+
+### Deploy Develop Branch (Preview)
+
+```bash
+git push origin develop
+# Vercel auto-deploys to https://your-app-preview.vercel.app
+# ↓
+# Loads: https://your-app-preview.vercel.app/docs/index.html
+# ↓
+# Uses develop branch scripts (latest changes)
 ```
 
-Embed the vendor script in any page:
-```html
-<iframe src="https://philskaroulis.github.io/iframe-activity-tracker/index.html"
-        sandbox="allow-same-origin allow-scripts">
-</iframe>
+**Console output:**
 ```
+[App] Environment: Development
+[App] Loading iframe from: https://your-app-preview.vercel.app/docs/index.html
+[App] ✓ Versions match - Parent: 2.0.0, Iframe: 2.0.0
+```
+
+### Deploy Main Branch (Production)
+
+```bash
+git push origin main
+# Vercel auto-deploys to production domain
+# ↓
+# Loads: https://philskaroulis.github.io/iframe-activity-tracker/index.html
+# ↓
+# Uses GitHub Pages scripts (stable main branch)
+```
+
+**Console output:**
+```
+[App] Environment: Production
+[App] Loading iframe from: https://philskaroulis.github.io/iframe-activity-tracker/index.html
+[App] ✓ Versions match - Parent: 2.0.0, Iframe: 2.0.0
+```
+
+### Version Mismatch Detection
+
+If versions don't match (deployment issue):
+```
+[App] ⚠️  Version mismatch! Parent: 2.0.0, Iframe: 1.9.0
+[App] This may cause compatibility issues
+```
+
+This indicates scripts aren't synced. Solutions:
+1. Wait for Vercel/GitHub Pages deployment to complete
+2. Clear browser cache (Ctrl+Shift+Delete)
+3. Check GitHub Pages has latest main branch code
+
+**See [DEPLOYMENT_STRATEGY.md](DEPLOYMENT_STRATEGY.md) for detailed deployment guide.**
 
 ## Browser Compatibility
 
@@ -378,6 +473,40 @@ Works in all modern browsers supporting:
 - Reduce event frequency or increase `MAX_EVENTS_PER_SECOND`
 - Check circuit breaker state: `window.UsageMeter.getCircuitBreakerState()`
 - Look for runaway event listeners in vendor script
+
+### Version mismatch warning in console?
+
+**Warning appears:**
+```
+[App] ⚠️  Version mismatch! Parent: 2.0.0, Iframe: 1.9.0
+```
+
+**Likely causes:**
+1. Deployment still in progress (GitHub Pages or Vercel)
+2. Browser cache hasn't updated
+3. CDN/GitHub Pages serving old version
+
+**Solutions:**
+1. Wait 1-2 minutes for deployment to complete
+2. Hard refresh: `Ctrl+Shift+Delete` (Windows/Linux) or `Cmd+Shift+Delete` (Mac)
+3. Check [DEPLOYMENT_STRATEGY.md](DEPLOYMENT_STRATEGY.md) for deployment details
+
+### Wrong environment being loaded?
+
+**Check in console:**
+```javascript
+window.location.hostname          // What domain are we on?
+// If localhost or *.vercel.app → should load local /docs/
+// Otherwise → should load GitHub Pages
+```
+
+**Verify correct iframe URL is loaded:**
+```javascript
+document.getElementById('activity-iframe').src
+// Should show either:
+// - http://localhost:3000/docs/index.html (dev)
+// - https://philskaroulis.github.io/... (prod)
+```
 
 ## Technical Notes
 
