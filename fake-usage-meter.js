@@ -14,10 +14,15 @@
         VENDOR_ORIGIN: 'https://philskaroulis.github.io',
         DEBUG: false,
         MAX_EVENTS_PER_SECOND: 100,
-        MAX_TIMESTAMP_DEVIATION_MS: 5000
+        MAX_TIMESTAMP_DEVIATION_MS: 5000,
+        AUTO_INIT: true  // Automatically initialize on load (set to false for manual init)
     };
 
     // ============ STATE ============
+    // Lifecycle state
+    let initialized = false;
+    let handleMessage = null;
+
     // Circuit breaker state
     let circuitBreakerState = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
     let eventCountThisSecond = 0;
@@ -189,8 +194,70 @@
         }
     }
 
+    // ============ LIFECYCLE MANAGEMENT ============
+    function init() {
+        if (initialized) {
+            warn('Already initialized');
+            return;
+        }
+
+        // Store reference to handler for cleanup
+        handleMessage = processMessage;
+
+        // Register message listener
+        window.addEventListener('message', handleMessage);
+
+        // Register default event handlers
+        createDefaultHandlers();
+
+        // Mark as initialized
+        initialized = true;
+
+        // Log initialization
+        console.log('[Usage Meter] Initialized with:');
+        console.log('  ✓ Origin validation (vendor: ' + CONFIG.VENDOR_ORIGIN + ')');
+        console.log('  ✓ Message source verification');
+        console.log('  ✓ Timestamp validation');
+        console.log('  ✓ Rate limiting & circuit breaker');
+        console.log('  ✓ Extensible event handlers');
+        console.log('[Usage Meter] Ready for messages from iframe');
+    }
+
+    function cleanup() {
+        if (!initialized) {
+            log('Not initialized, nothing to clean up');
+            return;
+        }
+
+        // Remove message listener
+        window.removeEventListener('message', handleMessage);
+
+        // Clear handler reference
+        handleMessage = null;
+
+        // Clear event handlers
+        eventHandlers.clear();
+
+        // Reset state
+        circuitBreakerState = 'CLOSED';
+        eventCountThisSecond = 0;
+        lastEventCountReset = Date.now();
+
+        // Mark as uninitialized
+        initialized = false;
+
+        console.log('[Usage Meter] Cleaned up and uninitialized');
+    }
+
+    function isInitialized() {
+        return initialized;
+    }
+
     // ============ PUBLIC API ============
     window.UsageMeter = {
+        init: init,
+        cleanup: cleanup,
+        isInitialized: isInitialized,
         registerHandler: registerEventHandler,
         setDebug: (enabled) => {
             CONFIG.DEBUG = enabled;
@@ -205,19 +272,11 @@
         getConfig: () => ({ ...CONFIG })
     };
 
-    // ============ INITIALIZATION ============
-    window.addEventListener('message', processMessage);
-    console.log('[Usage Meter] Message listener registered');
-
-    // Register default event handlers
-    createDefaultHandlers();
-
-    // Log initialization
-    console.log('[Usage Meter] Initialized with:');
-    console.log('  ✓ Origin validation (vendor: ' + CONFIG.VENDOR_ORIGIN + ')');
-    console.log('  ✓ Message source verification');
-    console.log('  ✓ Timestamp validation');
-    console.log('  ✓ Rate limiting & circuit breaker');
-    console.log('  ✓ Extensible event handlers');
-    console.log('[Usage Meter] Commands: window.UsageMeter.setDebug(true), window.UsageMeter.setVendorOrigin(url)');
+    // ============ AUTO-INITIALIZATION ============
+    // Initialize automatically if configured (default behavior for backward compatibility)
+    if (CONFIG.AUTO_INIT) {
+        init();
+    } else {
+        console.log('[Usage Meter] Loaded but not initialized. Call window.UsageMeter.init() to start.');
+    }
 })();

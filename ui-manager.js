@@ -6,6 +6,11 @@
     const INACTIVE_CLASS = 'inactive';
     const INACTIVITY_TIMEOUT = 10000;
 
+    // Lifecycle state
+    let initialized = false;
+    let animationFrameId = null;
+    let handleVisibilityChange = null;
+
     // State
     let lastActivityTime = null;
     let inactivityTimer = null;
@@ -73,29 +78,91 @@
         }
     }
 
-    // Public API
+    // ============ LIFECYCLE MANAGEMENT ============
+    function init() {
+        if (initialized) {
+            console.warn('[UI Manager] Already initialized');
+            return;
+        }
+
+        // Initialize state
+        setInactive();
+        countdown.classList.add('disabled');
+
+        // Start countdown animation loop
+        function animateCountdown() {
+            updateCountdown();
+            animationFrameId = requestAnimationFrame(animateCountdown);
+        }
+        animateCountdown();
+
+        // Handle parent window visibility
+        handleVisibilityChange = () => {
+            if (document.hidden) {
+                setInactive();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        initialized = true;
+        console.log('[UI Manager] Initialized');
+    }
+
+    function cleanup() {
+        if (!initialized) {
+            console.log('[UI Manager] Not initialized, nothing to clean up');
+            return;
+        }
+
+        // Cancel animation frame
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+
+        // Remove visibility listener
+        if (handleVisibilityChange) {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            handleVisibilityChange = null;
+        }
+
+        // Clear timers
+        if (inactivityTimer) {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = null;
+        }
+
+        // Reset state
+        lastActivityTime = null;
+        isActive = false;
+
+        // Reset UI to default state
+        if (header && statusText && countdown) {
+            header.classList.remove(ACTIVE_CLASS);
+            header.classList.add(INACTIVE_CLASS);
+            statusText.textContent = 'INACTIVE';
+            countdown.classList.add('disabled');
+            countdown.textContent = 'Seconds to INACTIVE: --s';
+        }
+
+        initialized = false;
+        console.log('[UI Manager] Cleaned up and uninitialized');
+    }
+
+    function isInitialized() {
+        return initialized;
+    }
+
+    // ============ PUBLIC API ============
     window.UIManager = {
-        setActive,
-        setInactive
+        init: init,
+        cleanup: cleanup,
+        isInitialized: isInitialized,
+        setActive: setActive,
+        setInactive: setInactive
     };
 
-    // Initialization
-    setInactive();
-    countdown.classList.add('disabled');
-
-    // Start countdown animation loop
-    function animateCountdown() {
-        updateCountdown();
-        requestAnimationFrame(animateCountdown);
-    }
-    animateCountdown();
-
-    // Handle parent window visibility
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            setInactive();
-        }
-    });
-
-    console.log('[UI Manager] Initialized');
+    // ============ AUTO-INITIALIZATION ============
+    // Auto-initialize on script load
+    init();
 })();
