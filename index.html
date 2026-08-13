@@ -46,18 +46,57 @@
     <script src="ui-manager.js"></script>
     <script src="fake-usage-meter.js"></script>
     <script>
+        // ============ ENVIRONMENT-BASED IFRAME LOADING ============
         const iframe = document.getElementById('activity-iframe');
-        const VENDOR_URL = 'https://philskaroulis.github.io/iframe-activity-tracker/index.html';
+
+        // Detect environment
+        const isDevelopment = window.location.hostname.includes('vercel.app') ||
+                             window.location.hostname === 'localhost';
+
+        // Load appropriate iframe URL based on environment
+        const VENDOR_URL = isDevelopment
+            ? window.location.origin + '/docs/index.html'  // Local docs folder (develop branch)
+            : 'https://philskaroulis.github.io/iframe-activity-tracker/index.html';  // GitHub Pages (main branch)
+
+        console.log('[App] Environment:', isDevelopment ? 'Development' : 'Production');
+        console.log('[App] Loading iframe from:', VENDOR_URL);
 
         // Handle iframe load success
         iframe.addEventListener('load', () => {
-            console.log('[Usage Meter] Iframe loaded successfully');
+            console.log('[App] Iframe loaded successfully');
+
+            // Verify script versions match
+            setTimeout(() => {
+                const parentVersion = window.UsageMeter.getVersion();
+                const iframeVersion = iframe.contentWindow.IframeMessenger?.getVersion?.();
+
+                if (iframeVersion) {
+                    console.log('[App] Version check - Parent:', parentVersion, 'Iframe:', iframeVersion);
+
+                    if (parentVersion === iframeVersion) {
+                        console.log('[App] ✓ Versions match');
+                    } else {
+                        console.warn('[App] ⚠️  Version mismatch! Parent:', parentVersion, 'Iframe:', iframeVersion);
+                        console.warn('[App] This may cause compatibility issues');
+                    }
+                } else {
+                    console.warn('[App] Could not verify iframe messenger version');
+                }
+
+                // Only initialize if iframe is responsive
+                if (iframe.contentWindow.IframeMessenger?.isInitialized?.()) {
+                    console.log('[App] Iframe messenger is initialized and responsive');
+                } else {
+                    console.warn('[App] Iframe messenger not responding');
+                }
+            }, 500);
         });
 
         // Handle iframe load failure (network error, security error, etc.)
         iframe.addEventListener('error', (event) => {
-            console.error('[Usage Meter] Iframe failed to load:', event);
-            console.error('[Usage Meter] Check vendor URL, CSP headers, and CORS policy');
+            console.error('[App] Iframe failed to load:', event);
+            console.error('[App] Check vendor URL, CSP headers, and CORS policy');
+            console.error('[App] Vendor URL:', VENDOR_URL);
         });
 
         // Set iframe source to trigger load

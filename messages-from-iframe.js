@@ -1,6 +1,7 @@
 // Iframe Activity Messenger - Detects and reports user activity to parent
 // Supports lifecycle management to prevent memory leaks in vendor apps
 (function() {
+    var VERSION = '2.0.0';
     var PARENT_ORIGIN = 'https://iframe-activity-tracker.vercel.app/';
     var MESSAGE_SOURCE = 'iframe-messages';
     var LOG_SOURCE = '[' + MESSAGE_SOURCE + '] ';
@@ -117,7 +118,8 @@
     window.IframeMessenger = {
         init: init,
         cleanup: cleanup,
-        isInitialized: isInitialized
+        isInitialized: isInitialized,
+        getVersion: function() { return VERSION; }
     };
 
     // ============ AUTO-INITIALIZATION ============

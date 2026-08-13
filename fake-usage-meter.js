@@ -8,6 +8,9 @@
 (function() {
     'use strict';
 
+    // ============ VERSION INFO ============
+    var VERSION = '2.0.0';
+
     // ============ CONFIGURATION ============
     const CONFIG = {
         MESSAGE_SOURCE: 'iframe-messages',
@@ -267,6 +270,7 @@
             CONFIG.VENDOR_ORIGIN = origin;
             log(`Vendor origin updated to: ${origin}`);
         },
+        getVersion: () => VERSION,
         getCircuitBreakerState: () => circuitBreakerState,
         getEventCountThisSecond: () => eventCountThisSecond,
         getConfig: () => ({ ...CONFIG })
