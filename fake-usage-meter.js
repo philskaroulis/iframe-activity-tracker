@@ -134,21 +134,21 @@
         try {
             console.log('[Usage Meter] Message received:', event.data);
 
-            // 1. Security: Origin validation (CRITICAL)
+            // 1. Verify message has data
+            if (!event.data) {
+                return;
+            }
+
+            // 2. Source identifier validation (quick filter for non-iframe messages)
+            if (event.data.source !== CONFIG.MESSAGE_SOURCE) {
+                // This is not for us (likely from dev tools, other iframes, etc.)
+                // Silently ignore instead of warning
+                return;
+            }
+
+            // 3. Security: Origin validation (CRITICAL - only check after confirming it's our message)
             if (event.origin !== CONFIG.VENDOR_ORIGIN) {
                 warn(`Message from untrusted origin: ${event.origin} (expected: ${CONFIG.VENDOR_ORIGIN})`);
-                return;
-            }
-
-            // 2. Security: Verify message has data
-            if (!event.data) {
-                console.log('[Usage Meter] No data in message');
-                return;
-            }
-
-            // 3. Security: Source identifier validation
-            if (event.data.source !== CONFIG.MESSAGE_SOURCE) {
-                warn(`Wrong message source: ${event.data.source} (expected: ${CONFIG.MESSAGE_SOURCE})`);
                 return;
             }
 
