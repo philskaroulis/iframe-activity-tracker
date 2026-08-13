@@ -1,32 +1,22 @@
-// Parent Activity Monitor - Enhanced with Security & Extensibility
-// Features:
-// - Error handling with try-catch
-// - Rate limiting & circuit breaker (prevent DOS)
-// - Extensible event handler registry
-// - Debug mode toggle
+// Activity Monitor - Message Handling & Security
+// Responsibilities:
+// - Receive and validate messages from iframe
 // - Timestamp validation
+// - Rate limiting & circuit breaker
+// - Event handler routing
 
 (function() {
     'use strict';
 
     // ============ CONFIGURATION ============
     const CONFIG = {
-        INACTIVITY_TIMEOUT: 10000,
-        VENDOR_ORIGIN: '*',
         MESSAGE_SOURCE: 'oreilly-metered-iframe',
         DEBUG: false,
         MAX_EVENTS_PER_SECOND: 100,
         MAX_TIMESTAMP_DEVIATION_MS: 5000
     };
 
-    const ACTIVE_CLASS = 'active';
-    const INACTIVE_CLASS = 'inactive';
-
     // ============ STATE ============
-    let lastActivityTime = null;
-    let inactivityTimer = null;
-    let isActive = false;
-
     // Circuit breaker state
     let circuitBreakerState = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
     let eventCountThisSecond = 0;
@@ -34,11 +24,6 @@
 
     // Event handler registry
     const eventHandlers = new Map();
-
-    // Get DOM elements
-    const header = document.querySelector('header');
-    const statusText = document.querySelector('.status-text');
-    const countdown = document.querySelector('.countdown');
 
     // ============ LOGGING UTILITIES ============
     function log(message, data) {
@@ -138,77 +123,9 @@
         });
     }
 
-    // ============ TIME FORMATTING ============
-    function formatTime(date) {
-        return date.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
-        });
-    }
-
-    // ============ COUNTDOWN DISPLAY ============
-    function updateCountdown() {
-        if (!isActive || !lastActivityTime) {
-            countdown.textContent = 'Seconds to INACTIVE: --s';
-            return;
-        }
-
-        const now = Date.now();
-        const elapsed = now - lastActivityTime.getTime();
-        const remainingMs = Math.max(0, CONFIG.INACTIVITY_TIMEOUT - elapsed);
-        const remainingSeconds = (remainingMs / 1000).toFixed(1);
-
-        countdown.textContent = `Seconds to INACTIVE: ${remainingSeconds}s`;
-    }
-
-    // ============ ACTIVITY STATE MANAGEMENT ============
-    function setActive() {
-        isActive = true;
-        header.classList.remove(INACTIVE_CLASS);
-        header.classList.add(ACTIVE_CLASS);
-        statusText.textContent = 'ACTIVE';
-
-        // Show countdown when active
-        countdown.classList.remove('disabled');
-
-        // Track activity time for countdown
-        lastActivityTime = new Date();
-
-        // Clear any existing inactivity timer
-        if (inactivityTimer) {
-            clearTimeout(inactivityTimer);
-        }
-
-        // Set a new inactivity timer
-        inactivityTimer = setTimeout(() => {
-            setInactive();
-        }, CONFIG.INACTIVITY_TIMEOUT);
-
-        // Update countdown immediately
-        updateCountdown();
-    }
-
-    function setInactive() {
-        isActive = false;
-        header.classList.remove(ACTIVE_CLASS);
-        header.classList.add(INACTIVE_CLASS);
-        statusText.textContent = 'INACTIVE';
-
-        // Disable countdown when inactive
-        countdown.classList.add('disabled');
-
-        if (inactivityTimer) {
-            clearTimeout(inactivityTimer);
-            inactivityTimer = null;
-        }
-    }
-
     // ============ MESSAGE PROCESSING ============
     function processMessage(event) {
         try {
-            // Debug: Log all messages received
             console.log('[Activity Monitor] Message received:', event.data);
 
             // 1. Security: Source validation
@@ -250,12 +167,13 @@
                 warn(`No handler registered for event type: ${type}`);
             }
 
-            // 7. Trigger activity state change based on event type
-            // Visibility changes deactivate, all other user actions activate
-            if (type === 'OREILLY_VISIBILITY_CHANGE_MESSAGE') {
-                setInactive();
-            } else {
-                setActive();
+            // 7. Update UI state
+            if (window.UIManager) {
+                if (type === 'OREILLY_VISIBILITY_CHANGE_MESSAGE') {
+                    window.UIManager.setInactive();
+                } else {
+                    window.UIManager.setActive();
+                }
             }
 
         } catch (e) {
@@ -279,37 +197,14 @@
     window.addEventListener('message', processMessage);
     console.log('[Activity Monitor] Message listener registered');
 
-    // Listen for parent window visibility changes (parent losing/gaining focus)
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            log('Parent window lost focus - setting INACTIVE');
-            setInactive();
-        } else {
-            log('Parent window regained focus');
-            // Don't automatically set ACTIVE - wait for user activity in iframe
-        }
-    });
-
-    // Set initial state (INACTIVE with disabled countdown)
-    setInactive();
-    countdown.classList.add('disabled');
-
-    // Start countdown animation loop
-    function animateCountdown() {
-        updateCountdown();
-        requestAnimationFrame(animateCountdown);
-    }
-    animateCountdown();
-
     // Register default event handlers
     createDefaultHandlers();
 
     // Log initialization
-    console.log('[Activity Monitor] Initialized with enhancements:');
-    console.log('  ✓ Error handling');
+    console.log('[Activity Monitor] Initialized with:');
+    console.log('  ✓ Message validation & security');
+    console.log('  ✓ Timestamp validation');
     console.log('  ✓ Rate limiting & circuit breaker');
     console.log('  ✓ Extensible event handlers');
-    console.log('  ✓ Timestamp validation');
-    console.log('  ✓ Debug mode support');
     console.log('[Activity Monitor] Enable debug: window.ActivityMonitor.setDebug(true)');
 })();
