@@ -31,89 +31,12 @@
             color: #7f8c8d;
             margin-bottom: 30px;
         }
-        .section {
-            margin-bottom: 30px;
-        }
-        h2 {
-            color: #34495e;
-            margin-top: 30px;
-            margin-bottom: 15px;
-        }
-        .code-block {
-            background: #f8f8f8;
-            border-left: 4px solid #3498db;
-            padding: 15px;
-            margin: 15px 0;
-            overflow-x: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-        }
-        .link-button {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 10px;
-            transition: background 0.3s;
-        }
-        .link-button:hover {
-            background: #2980b9;
-        }
-        ul, ol {
-            margin-left: 20px;
-            margin-bottom: 15px;
-        }
-        li {
-            margin-bottom: 8px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>iframe Activity Tracker</h1>
         <p class="subtitle">Production-ready activity monitoring system for embedded iframes</p>
-
-        <div class="section">
-            <h2>Overview</h2>
-            <p>A comprehensive solution for detecting and tracking user engagement within embedded iframes. Features security validation, rate limiting, and extensible event handling.</p>
-        </div>
-
-        <div class="section">
-            <h2>Quick Start</h2>
-            <p>Include the minified script in your iframe:</p>
-            <div class="code-block">&lt;script src="https://philskaroulis.github.io/iframe-activity-tracker/oreilly-messages.min.js"&gt;&lt;/script&gt;</div>
-        </div>
-
-        <div class="section">
-            <h2>Features</h2>
-            <ul>
-                <li><strong>Real-time Activity Detection</strong> — Click, keypress, scroll, mouse movement, visibility changes</li>
-                <li><strong>Live Countdown Timer</strong> — Shows milliseconds until next inactivity status update</li>
-                <li><strong>Color-coded Status</strong> — GREEN (ACTIVE) / GRAY (INACTIVE) with timestamps</li>
-                <li><strong>Message Validation</strong> — Origin check, source verification, event type validation</li>
-                <li><strong>Error Handling</strong> — Try-catch wrapper prevents silent failures</li>
-                <li><strong>Rate Limiting & Circuit Breaker</strong> — Auto-limits damage from malicious/spamming iframes</li>
-                <li><strong>Timestamp Validation</strong> — Detects clock skew with configurable tolerance</li>
-                <li><strong>Extensible Event Handlers</strong> — Register custom handlers for any event type</li>
-                <li><strong>Debug Mode</strong> — Toggle verbose logging for troubleshooting</li>
-            </ul>
-        </div>
-
-        <div class="section">
-            <h2>Resources</h2>
-            <ul>
-                <li><a href="https://github.com/philskaroulis/iframe-activity-tracker">GitHub Repository</a></li>
-                <li><a href="./oreilly-messages.min.js">Minified Script</a></li>
-            </ul>
-        </div>
-
-        <div class="section">
-            <p style="color: #7f8c8d; font-size: 13px; margin-top: 40px;">
-                Built with security, reliability, and developer experience in mind.
-            </p>
-        </div>
     </div>
 </body>
 </html>
