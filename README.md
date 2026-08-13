@@ -124,6 +124,32 @@ The scripts automatically:
 - Update UI state (via `UIManager`)
 - Enforce rate limits
 
+### Lifecycle Management (for SPAs)
+
+For single-page applications, manage initialization and cleanup to prevent memory leaks:
+
+```javascript
+// In component mount
+window.UsageMeter.init();
+window.UIManager.init();
+
+// In component unmount
+window.UsageMeter.cleanup();
+window.UIManager.cleanup();
+```
+
+Check initialization status:
+
+```javascript
+if (window.UsageMeter.isInitialized()) {
+  console.log('Usage meter is active');
+}
+```
+
+Disable auto-initialization by setting `AUTO_INIT: false` in config for manual control.
+
+**See [SPA_INTEGRATION.md](SPA_INTEGRATION.md) for framework-specific examples (React, Vue, Angular).**
+
 ### Debug Mode
 
 Enable verbose logging in the browser console:
@@ -162,6 +188,19 @@ window.UsageMeter.getEventCountThisSecond(); // 0-100+
 
 // Get current configuration
 window.UsageMeter.getConfig();
+```
+
+### Lifecycle & Configuration API
+
+```javascript
+// Lifecycle control (for SPAs)
+window.UsageMeter.init();                    // Manually initialize
+window.UsageMeter.cleanup();                 // Clean up for unmount
+window.UsageMeter.isInitialized();           // Check status
+
+// Configuration
+window.UsageMeter.setDebug(true);            // Enable/disable debug logging
+window.UsageMeter.setVendorOrigin(url);      // Update trusted vendor origin
 ```
 
 ### Control UI State Programmatically
