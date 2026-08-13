@@ -23,7 +23,9 @@
         <!-- The iframe that will detect user events -->
         <iframe
             id="activity-iframe"
-            sandbox="allow-same-origin allow-scripts"
+            title="Vendor content iframe for activity tracking"
+            sandbox="allow-scripts"
+            referrerpolicy="no-referrer"
         ></iframe>
 
         <div class="info-section">
@@ -45,7 +47,21 @@
     <script src="fake-usage-meter.js"></script>
     <script>
         const iframe = document.getElementById('activity-iframe');
-        iframe.src = 'https://philskaroulis.github.io/iframe-activity-tracker/index.html';
+        const VENDOR_URL = 'https://philskaroulis.github.io/iframe-activity-tracker/index.html';
+
+        // Handle iframe load success
+        iframe.addEventListener('load', () => {
+            console.log('[Usage Meter] Iframe loaded successfully');
+        });
+
+        // Handle iframe load failure (network error, security error, etc.)
+        iframe.addEventListener('error', (event) => {
+            console.error('[Usage Meter] Iframe failed to load:', event);
+            console.error('[Usage Meter] Check vendor URL, CSP headers, and CORS policy');
+        });
+
+        // Set iframe source to trigger load
+        iframe.src = VENDOR_URL;
     </script>
 </body>
 </html>

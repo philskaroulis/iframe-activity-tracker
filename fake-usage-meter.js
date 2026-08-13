@@ -11,6 +11,7 @@
     // ============ CONFIGURATION ============
     const CONFIG = {
         MESSAGE_SOURCE: 'iframe-messages',
+        VENDOR_ORIGIN: 'https://philskaroulis.github.io',
         DEBUG: false,
         MAX_EVENTS_PER_SECOND: 100,
         MAX_TIMESTAMP_DEVIATION_MS: 5000
@@ -128,38 +129,45 @@
         try {
             console.log('[Usage Meter] Message received:', event.data);
 
-            // 1. Security: Source validation
+            // 1. Security: Origin validation (CRITICAL)
+            if (event.origin !== CONFIG.VENDOR_ORIGIN) {
+                warn(`Message from untrusted origin: ${event.origin} (expected: ${CONFIG.VENDOR_ORIGIN})`);
+                return;
+            }
+
+            // 2. Security: Verify message has data
             if (!event.data) {
                 console.log('[Usage Meter] No data in message');
                 return;
             }
 
+            // 3. Security: Source identifier validation
             if (event.data.source !== CONFIG.MESSAGE_SOURCE) {
-                console.log(`[Usage Meter] Wrong source: ${event.data.source} (expected: ${CONFIG.MESSAGE_SOURCE})`);
+                warn(`Wrong message source: ${event.data.source} (expected: ${CONFIG.MESSAGE_SOURCE})`);
                 return;
             }
 
-            // 2. Extract and validate data
+            // 4. Extract and validate data
             const { type, timestamp: eventTimestamp, ...details } = event.data;
 
-            // 3. Timestamp validation
+            // 5. Timestamp validation
             if (!validateTimestamp(eventTimestamp)) {
                 return;
             }
 
-            // 4. Event type validation
+            // 6. Event type validation
             if (!type || !type.startsWith('IFRAME_')) {
                 warn(`Unknown event type: ${type}`);
                 return;
             }
 
-            // 5. Rate limiting / Circuit breaker
+            // 7. Rate limiting / Circuit breaker
             if (!checkRateLimit()) {
                 log(`Message dropped - circuit breaker OPEN or rate limit exceeded`);
                 return;
             }
 
-            // 6. Route to handler
+            // 8. Route to handler
             const handler = eventHandlers.get(type);
             if (handler) {
                 handler(details, eventTimestamp);
@@ -167,7 +175,7 @@
                 warn(`No handler registered for event type: ${type}`);
             }
 
-            // 7. Update UI state
+            // 9. Update UI state
             if (window.UIManager) {
                 if (type === 'IFRAME_VISIBILITY_CHANGE_MESSAGE') {
                     window.UIManager.setInactive();
@@ -188,6 +196,10 @@
             CONFIG.DEBUG = enabled;
             log(`Debug mode ${enabled ? 'enabled' : 'disabled'}`);
         },
+        setVendorOrigin: (origin) => {
+            CONFIG.VENDOR_ORIGIN = origin;
+            log(`Vendor origin updated to: ${origin}`);
+        },
         getCircuitBreakerState: () => circuitBreakerState,
         getEventCountThisSecond: () => eventCountThisSecond,
         getConfig: () => ({ ...CONFIG })
@@ -202,9 +214,10 @@
 
     // Log initialization
     console.log('[Usage Meter] Initialized with:');
-    console.log('  ✓ Message validation & security');
+    console.log('  ✓ Origin validation (vendor: ' + CONFIG.VENDOR_ORIGIN + ')');
+    console.log('  ✓ Message source verification');
     console.log('  ✓ Timestamp validation');
     console.log('  ✓ Rate limiting & circuit breaker');
     console.log('  ✓ Extensible event handlers');
-    console.log('[Usage Meter] Enable debug: window.UsageMeter.setDebug(true)');
+    console.log('[Usage Meter] Commands: window.UsageMeter.setDebug(true), window.UsageMeter.setVendorOrigin(url)');
 })();
