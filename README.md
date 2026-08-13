@@ -124,9 +124,11 @@ The scripts automatically:
 - Update UI state (via `UIManager`)
 - Enforce rate limits
 
-### Lifecycle Management (for SPAs)
+### Lifecycle Management
 
-For single-page applications, manage initialization and cleanup to prevent memory leaks:
+**For Parent Page (Usage Meter):**
+
+Manage initialization and cleanup to prevent memory leaks in single-page applications:
 
 ```javascript
 // In component mount
@@ -138,17 +140,23 @@ window.UsageMeter.cleanup();
 window.UIManager.cleanup();
 ```
 
-Check initialization status:
+**For Vendor App (in iframe):**
+
+If your vendor app is an SPA, clean up the activity messenger on unmount:
 
 ```javascript
-if (window.UsageMeter.isInitialized()) {
-  console.log('Usage meter is active');
+// When vendor app mounts
+if (!window.IframeMessenger.isInitialized()) {
+  window.IframeMessenger.init();
 }
+
+// When vendor app unmounts
+window.IframeMessenger.cleanup();
 ```
 
-Disable auto-initialization by setting `AUTO_INIT: false` in config for manual control.
-
-**See [SPA_INTEGRATION.md](SPA_INTEGRATION.md) for framework-specific examples (React, Vue, Angular).**
+**Integration Guides:**
+- **[SPA_INTEGRATION.md](SPA_INTEGRATION.md)** — Parent page developers (React, Vue, Angular examples)
+- **[VENDOR_INTEGRATION.md](VENDOR_INTEGRATION.md)** — Vendor app developers (how to clean up in your SPA)
 
 ### Debug Mode
 
@@ -192,6 +200,8 @@ window.UsageMeter.getConfig();
 
 ### Lifecycle & Configuration API
 
+**Parent Page (fake-usage-meter.js):**
+
 ```javascript
 // Lifecycle control (for SPAs)
 window.UsageMeter.init();                    // Manually initialize
@@ -201,6 +211,17 @@ window.UsageMeter.isInitialized();           // Check status
 // Configuration
 window.UsageMeter.setDebug(true);            // Enable/disable debug logging
 window.UsageMeter.setVendorOrigin(url);      // Update trusted vendor origin
+```
+
+**Vendor App (messages-from-iframe.js):**
+
+```javascript
+// Lifecycle control (for SPAs)
+window.IframeMessenger.init();               // Manually initialize
+window.IframeMessenger.cleanup();            // Clean up for unmount
+window.IframeMessenger.isInitialized();      // Check status
+
+// Auto-initializes on load, but can be managed for SPA lifecycle
 ```
 
 ### Control UI State Programmatically
