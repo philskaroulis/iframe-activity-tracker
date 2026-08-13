@@ -291,6 +291,16 @@ window.parent.postMessage({
 | `docs/index.html` | Vendor iframe content (served from GitHub Pages) |
 | `docs/messages-from-iframe.min.js` | Vendor script CDN link |
 
+## Documentation
+
+| Document | Purpose |
+|----------|---------|
+| `HOW_IT_WORKS.md` | Conceptual explanation of cross-origin iframe communication |
+| `IFRAME_ANALYSIS.md` | Security audit identifying weaknesses and improvements |
+| `SPA_INTEGRATION.md` | Parent page developers: lifecycle management in React, Vue, Angular |
+| `VENDOR_INTEGRATION.md` | Vendor app developers: lifecycle management in vendor SPAs |
+| `TESTING_GUIDE.md` | Comprehensive testing for cross-origin and multi-iframe scenarios |
+
 ## Getting Started
 
 ### Local Development
