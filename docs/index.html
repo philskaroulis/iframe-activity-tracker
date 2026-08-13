@@ -1,42 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iframe Activity Tracker</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #f5f5f5;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            background: white;
-            min-height: 100vh;
-        }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            color: #7f8c8d;
-            margin-bottom: 30px;
-        }
+        body { font-family: sans-serif; padding: 20px; background-color: #fafafa; }
+        h2 { color: #333; }
+        p { color: #666; line-height: 1.6; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>iframe Activity Tracker</h1>
-        <p class="subtitle">Production-ready activity monitoring system for embedded iframes</p>
-    </div>
+    <h2>Activity Detection Area</h2>
+    <p>Try these actions inside this iframe:</p>
+    <ul>
+        <li>Click anywhere</li>
+        <li>Type or press keys</li>
+        <li>Move your mouse</li>
+        <li>Scroll the page</li>
+        <li>Switch tabs (visibility change)</li>
+    </ul>
+    <p style="margin-top: 20px; padding: 10px; background: #e3f2fd; border-radius: 4px;">
+        💡 Each action will send a message to the parent page, which will update the header status.
+    </p>
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+    <h3>📜 Scroll Testing Content</h3>
+    <p>This section provides enough content to enable scrolling within the iframe. Try scrolling down to test the scroll event detection!</p>
+    <p><strong>Section 1:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    <p><strong>Section 2:</strong> Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <p><strong>Section 3:</strong> Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+    <p><strong>Section 4:</strong> Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+    <p><strong>Section 5:</strong> Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+    <p><strong>Section 6:</strong> At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.</p>
+    <p><strong>Section 7:</strong> Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.</p>
+    <p style="margin-top: 40px; padding: 15px; background: #fff3e0; border-radius: 4px; border-left: 4px solid #ff9800;">
+        🎯 <strong>Scroll down to see all this content and trigger scroll events!</strong>
+    </p>
+    <script src="./oreilly-messages.min.js"></script>
 </body>
 </html>
