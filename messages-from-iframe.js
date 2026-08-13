@@ -1,8 +1,15 @@
+// Iframe Activity Messenger - Detects and reports user activity to parent
+// Supports lifecycle management to prevent memory leaks in vendor apps
 (function() {
     var PARENT_ORIGIN = 'https://iframe-activity-tracker.vercel.app/';
     var MESSAGE_SOURCE = 'iframe-messages';
-    var LOG_SOURCE = '['+MESSAGE_SOURCE+'] ';
+    var LOG_SOURCE = '[' + MESSAGE_SOURCE + '] ';
 
+    // Lifecycle state
+    var initialized = false;
+    var listeners = {};
+
+    // ============ CORE FUNCTIONS ============
     function sendMessageToParent(eventType) {
         try {
             window.parent.postMessage({
@@ -28,25 +35,92 @@
         };
     }
 
-    window.addEventListener('click', function() {
+    // ============ NAMED HANDLER FUNCTIONS ============
+    // These are stored by reference so they can be removed
+    function handleClick() {
         sendMessageToParent('IFRAME_CLICK_MESSAGE');
-    }, { passive: true });
+    }
 
-    window.addEventListener('keydown', function() {
+    function handleKeydown() {
         sendMessageToParent('IFRAME_KEYPRESS_MESSAGE');
-    }, { passive: true });
+    }
 
-    window.addEventListener('scroll', throttle(function() {
+    var handleScroll = throttle(function() {
         sendMessageToParent('IFRAME_SCROLL_MESSAGE');
-    }, 200), { passive: true });
+    }, 200);
 
-    window.addEventListener('mousemove', throttle(function() {
+    var handleMousemove = throttle(function() {
         sendMessageToParent('IFRAME_MOUSEMOVE_MESSAGE');
-    }, 500), { passive: true });
+    }, 500);
 
-    document.addEventListener('visibilitychange', function() {
+    function handleVisibilityChange() {
         sendMessageToParent('IFRAME_VISIBILITY_CHANGE_MESSAGE');
-    }, { passive: true });
+    }
 
-    console.log(LOG_SOURCE + 'Event listeners attached to ');
+    // ============ LIFECYCLE MANAGEMENT ============
+    function init() {
+        if (initialized) {
+            console.warn(LOG_SOURCE + 'Already initialized');
+            return;
+        }
+
+        // Register click listener
+        window.addEventListener('click', handleClick, { passive: true });
+        listeners.click = { target: window, handler: handleClick, options: { passive: true } };
+
+        // Register keydown listener
+        window.addEventListener('keydown', handleKeydown, { passive: true });
+        listeners.keydown = { target: window, handler: handleKeydown, options: { passive: true } };
+
+        // Register scroll listener (throttled)
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        listeners.scroll = { target: window, handler: handleScroll, options: { passive: true } };
+
+        // Register mousemove listener (throttled)
+        window.addEventListener('mousemove', handleMousemove, { passive: true });
+        listeners.mousemove = { target: window, handler: handleMousemove, options: { passive: true } };
+
+        // Register visibilitychange listener (on document)
+        document.addEventListener('visibilitychange', handleVisibilityChange, { passive: true });
+        listeners.visibilitychange = { target: document, handler: handleVisibilityChange, options: { passive: true } };
+
+        initialized = true;
+        console.log(LOG_SOURCE + 'Initialized and listening for events');
+    }
+
+    function cleanup() {
+        if (!initialized) {
+            console.log(LOG_SOURCE + 'Not initialized, nothing to clean up');
+            return;
+        }
+
+        // Remove all listeners
+        var eventNames = Object.keys(listeners);
+        for (var i = 0; i < eventNames.length; i++) {
+            var eventName = eventNames[i];
+            var listener = listeners[eventName];
+            listener.target.removeEventListener(eventName, listener.handler, listener.options);
+        }
+
+        // Clear listener references
+        listeners = {};
+        initialized = false;
+
+        console.log(LOG_SOURCE + 'Cleaned up and stopped listening');
+    }
+
+    function isInitialized() {
+        return initialized;
+    }
+
+    // ============ PUBLIC API ============
+    window.IframeMessenger = {
+        init: init,
+        cleanup: cleanup,
+        isInitialized: isInitialized
+    };
+
+    // ============ AUTO-INITIALIZATION ============
+    // Auto-initialize on script load (can be disabled by calling cleanup)
+    init();
 })();
