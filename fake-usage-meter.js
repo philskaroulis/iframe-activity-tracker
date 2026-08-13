@@ -1,4 +1,4 @@
-// Activity Monitor - Message Handling & Security
+// Usage Meter - Message Handling & Security
 // Responsibilities:
 // - Receive and validate messages from iframe
 // - Timestamp validation
@@ -10,7 +10,7 @@
 
     // ============ CONFIGURATION ============
     const CONFIG = {
-        MESSAGE_SOURCE: 'oreilly-metered-iframe',
+        MESSAGE_SOURCE: 'iframe-messages',
         DEBUG: false,
         MAX_EVENTS_PER_SECOND: 100,
         MAX_TIMESTAMP_DEVIATION_MS: 5000
@@ -28,16 +28,16 @@
     // ============ LOGGING UTILITIES ============
     function log(message, data) {
         if (CONFIG.DEBUG) {
-            console.log(`[Activity Monitor] ${message}`, data || '');
+            console.log(`[Usage Meter] ${message}`, data || '');
         }
     }
 
     function warn(message, data) {
-        console.warn(`[Activity Monitor] ⚠️  ${message}`, data || '');
+        console.warn(`[Usage Meter] ⚠️  ${message}`, data || '');
     }
 
     function error(message, data) {
-        console.error(`[Activity Monitor] ❌ ${message}`, data || '');
+        console.error(`[Usage Meter] ❌ ${message}`, data || '');
     }
 
     // ============ TIMESTAMP VALIDATION ============
@@ -102,23 +102,23 @@
     }
 
     function createDefaultHandlers() {
-        registerEventHandler('OREILLY_CLICK_MESSAGE', (details, eventTimestamp) => {
+        registerEventHandler('IFRAME_CLICK_MESSAGE', (details, eventTimestamp) => {
             log(`User clicked inside iframe`, { timestamp: eventTimestamp });
         });
 
-        registerEventHandler('OREILLY_KEYPRESS_MESSAGE', (details, eventTimestamp) => {
+        registerEventHandler('IFRAME_KEYPRESS_MESSAGE', (details, eventTimestamp) => {
             log(`User typing detected inside iframe`, { timestamp: eventTimestamp });
         });
 
-        registerEventHandler('OREILLY_SCROLL_MESSAGE', (details, eventTimestamp) => {
+        registerEventHandler('IFRAME_SCROLL_MESSAGE', (details, eventTimestamp) => {
             log(`User scrolled inside iframe`, { timestamp: eventTimestamp });
         });
 
-        registerEventHandler('OREILLY_MOUSEMOVE_MESSAGE', (details, eventTimestamp) => {
+        registerEventHandler('IFRAME_MOUSEMOVE_MESSAGE', (details, eventTimestamp) => {
             log(`Active mouse movement detected inside iframe`, { timestamp: eventTimestamp });
         });
 
-        registerEventHandler('OREILLY_VISIBILITY_CHANGE_MESSAGE', (details, eventTimestamp) => {
+        registerEventHandler('IFRAME_VISIBILITY_CHANGE_MESSAGE', (details, eventTimestamp) => {
             log(`iFrame visibility changed`, { timestamp: eventTimestamp });
         });
     }
@@ -126,16 +126,16 @@
     // ============ MESSAGE PROCESSING ============
     function processMessage(event) {
         try {
-            console.log('[Activity Monitor] Message received:', event.data);
+            console.log('[Usage Meter] Message received:', event.data);
 
             // 1. Security: Source validation
             if (!event.data) {
-                console.log('[Activity Monitor] No data in message');
+                console.log('[Usage Meter] No data in message');
                 return;
             }
 
             if (event.data.source !== CONFIG.MESSAGE_SOURCE) {
-                console.log(`[Activity Monitor] Wrong source: ${event.data.source} (expected: ${CONFIG.MESSAGE_SOURCE})`);
+                console.log(`[Usage Meter] Wrong source: ${event.data.source} (expected: ${CONFIG.MESSAGE_SOURCE})`);
                 return;
             }
 
@@ -148,7 +148,7 @@
             }
 
             // 4. Event type validation
-            if (!type || !type.startsWith('OREILLY_')) {
+            if (!type || !type.startsWith('IFRAME_')) {
                 warn(`Unknown event type: ${type}`);
                 return;
             }
@@ -169,7 +169,7 @@
 
             // 7. Update UI state
             if (window.UIManager) {
-                if (type === 'OREILLY_VISIBILITY_CHANGE_MESSAGE') {
+                if (type === 'IFRAME_VISIBILITY_CHANGE_MESSAGE') {
                     window.UIManager.setInactive();
                 } else {
                     window.UIManager.setActive();
@@ -182,7 +182,7 @@
     }
 
     // ============ PUBLIC API ============
-    window.ActivityMonitor = {
+    window.UsageMeter = {
         registerHandler: registerEventHandler,
         setDebug: (enabled) => {
             CONFIG.DEBUG = enabled;
@@ -195,16 +195,16 @@
 
     // ============ INITIALIZATION ============
     window.addEventListener('message', processMessage);
-    console.log('[Activity Monitor] Message listener registered');
+    console.log('[Usage Meter] Message listener registered');
 
     // Register default event handlers
     createDefaultHandlers();
 
     // Log initialization
-    console.log('[Activity Monitor] Initialized with:');
+    console.log('[Usage Meter] Initialized with:');
     console.log('  ✓ Message validation & security');
     console.log('  ✓ Timestamp validation');
     console.log('  ✓ Rate limiting & circuit breaker');
     console.log('  ✓ Extensible event handlers');
-    console.log('[Activity Monitor] Enable debug: window.ActivityMonitor.setDebug(true)');
+    console.log('[Usage Meter] Enable debug: window.UsageMeter.setDebug(true)');
 })();

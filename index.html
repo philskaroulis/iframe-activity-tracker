@@ -29,12 +29,12 @@
         <div class="info-section">
             <h2>How This Works</h2>
             <p>
-                <strong>Parent Page (this page):</strong> Uses parent-library.js to listen for messages
+                <strong>Parent Page (this page):</strong> Uses fake-usage-meter.js to listen for messages
                 from the iframe and tracks user activity. When activity is detected, the header turns
-                green (ACTIVE). After 15 seconds with no activity, it turns gray (INACTIVE).
+                green (ACTIVE). After 10 seconds with no activity, it turns gray (INACTIVE).
             </p>
             <p>
-                <strong>Iframe:</strong> Uses iframe-messages.js to detect user events
+                <strong>Iframe:</strong> Uses messages-from-iframe.js to detect user events
                 (click, keydown, scroll, mousemove, visibilitychange) and sends them to the parent
                 page using window.parent.postMessage().
             </p>
@@ -42,7 +42,7 @@
     </div>
 
     <script src="ui-manager.js"></script>
-    <script src="parent-library.js"></script>
+    <script src="fake-usage-meter.js"></script>
     <script>
         const iframe = document.getElementById('activity-iframe');
         iframe.src = 'https://philskaroulis.github.io/iframe-activity-tracker/index.html';

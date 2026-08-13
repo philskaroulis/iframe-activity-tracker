@@ -38,7 +38,7 @@ A production-ready activity monitoring system for demonstrating secure message p
 │  │  (loaded from GitHub Pages)  │  │
 │  └──────────────────────────────┘  │
 │                                     │
-│  parent-library.js:                │
+│  fake-usage-meter.js:                │
 │  - Validates & routes messages     │
 │  - Enforces rate limits            │
 │  - Manages event handlers          │
@@ -50,7 +50,7 @@ A production-ready activity monitoring system for demonstrating secure message p
     │  VENDOR IFRAME        │
     │  (GitHub Pages)       │
     │                       │
-    │ oreilly-messages.min.js:
+    │ messages-from-iframe.min.js:
     │ - Detects events      │
     │ - Sends messages      │
     └───────────────────────┘
@@ -61,8 +61,8 @@ A production-ready activity monitoring system for demonstrating secure message p
 | Layer | Files | Responsibility |
 |-------|-------|-----------------|
 | **UI** | `ui-manager.js`, `styles.css` | Visual state, countdown, header styling |
-| **Message Handling** | `parent-library.js` | Validation, security, rate limiting, routing |
-| **Vendor Script** | `oreilly-messages.min.js` | Event detection, message sending |
+| **Message Handling** | `fake-usage-meter.js` | Validation, security, rate limiting, routing |
+| **Vendor Script** | `messages-from-iframe.min.js` | Event detection, message sending |
 | **Static Content** | `docs/index.html` | Iframe content served from GitHub Pages |
 
 ### Message Format
@@ -71,8 +71,8 @@ Vendor iframe sends minimal, focused messages:
 
 ```javascript
 {
-  source: "oreilly-metered-iframe",    // Message source identifier
-  type: "OREILLY_CLICK_MESSAGE",       // Event type
+  source: "iframe-messages",    // Message source identifier
+  type: "IFRAME_CLICK_MESSAGE",       // Event type
   timestamp: 1691743200000             // Event timestamp (ms)
 }
 ```
@@ -83,19 +83,19 @@ Vendor iframe sends minimal, focused messages:
 
 | Event | Throttle | Handler Parameter |
 |-------|----------|-------------------|
-| `OREILLY_CLICK_MESSAGE` | None | `details` (empty) |
-| `OREILLY_KEYPRESS_MESSAGE` | None | `details` (empty) |
-| `OREILLY_SCROLL_MESSAGE` | 200ms | `details` (empty) |
-| `OREILLY_MOUSEMOVE_MESSAGE` | 500ms | `details` (empty) |
-| `OREILLY_VISIBILITY_CHANGE_MESSAGE` | None | `details` (empty) |
+| `IFRAME_CLICK_MESSAGE` | None | `details` (empty) |
+| `IFRAME_KEYPRESS_MESSAGE` | None | `details` (empty) |
+| `IFRAME_SCROLL_MESSAGE` | 200ms | `details` (empty) |
+| `IFRAME_MOUSEMOVE_MESSAGE` | 500ms | `details` (empty) |
+| `IFRAME_VISIBILITY_CHANGE_MESSAGE` | None | `details` (empty) |
 
 ## Configuration
 
-Edit `CONFIG` in `parent-library.js`:
+Edit `CONFIG` in `fake-usage-meter.js`:
 
 ```javascript
 const CONFIG = {
-  MESSAGE_SOURCE: 'oreilly-metered-iframe',  // Expected message source
+  MESSAGE_SOURCE: 'iframe-messages',  // Expected message source
   DEBUG: false,                              // Enable verbose logging
   MAX_EVENTS_PER_SECOND: 100,                // Rate limit threshold
   MAX_TIMESTAMP_DEVIATION_MS: 5000           // Max acceptable clock skew (5s)
@@ -109,7 +109,7 @@ const CONFIG = {
 1. Include scripts in order:
    ```html
    <script src="ui-manager.js"></script>
-   <script src="parent-library.js"></script>
+   <script src="fake-usage-meter.js"></script>
    ```
 
 2. Set iframe source:
@@ -129,19 +129,19 @@ The scripts automatically:
 Enable verbose logging in the browser console:
 
 ```javascript
-window.ActivityMonitor.setDebug(true);
+window.UsageMeter.setDebug(true);
 ```
 
 Output example:
 ```
-[Activity Monitor] Message received: {source: "oreilly-metered-iframe", type: "OREILLY_CLICK_MESSAGE", timestamp: 1691743200000}
+[Activity Monitor] Message received: {source: "iframe-messages", type: "IFRAME_CLICK_MESSAGE", timestamp: 1691743200000}
 [Activity Monitor] User clicked inside iframe {timestamp: 1691743200000}
 ```
 
 ### Register Custom Event Handler
 
 ```javascript
-window.ActivityMonitor.registerHandler('OREILLY_CLICK_MESSAGE', (details, timestamp) => {
+window.UsageMeter.registerHandler('IFRAME_CLICK_MESSAGE', (details, timestamp) => {
   console.log('User clicked in iframe', { timestamp });
   // Send to analytics, update database, etc.
 });
@@ -155,13 +155,13 @@ All handlers receive:
 
 ```javascript
 // Check if iframe is being rate-limited
-window.ActivityMonitor.getCircuitBreakerState();  // 'CLOSED', 'OPEN', 'HALF_OPEN'
+window.UsageMeter.getCircuitBreakerState();  // 'CLOSED', 'OPEN', 'HALF_OPEN'
 
 // Get current event count this second
-window.ActivityMonitor.getEventCountThisSecond(); // 0-100+
+window.UsageMeter.getEventCountThisSecond(); // 0-100+
 
 // Get current configuration
-window.ActivityMonitor.getConfig();
+window.UsageMeter.getConfig();
 ```
 
 ### Control UI State Programmatically
@@ -184,9 +184,9 @@ if (event.data.source !== CONFIG.MESSAGE_SOURCE) {
 ```
 
 ### 2. Event Type Validation
-Only event types starting with `OREILLY_` are processed:
+Only event types starting with `IFRAME_` are processed:
 ```javascript
-if (!type || !type.startsWith('OREILLY_')) {
+if (!type || !type.startsWith('IFRAME_')) {
   // Message rejected
   return;
 }
@@ -212,8 +212,8 @@ All errors are caught and logged without crashing the application:
 ```javascript
 // Invalid messages are safely rejected
 window.parent.postMessage({
-  source: 'oreilly-metered-iframe',
-  type: 'OREILLY_INVALID_EVENT',  // Unknown type — rejected
+  source: 'iframe-messages',
+  type: 'IFRAME_INVALID_EVENT',  // Unknown type — rejected
   timestamp: 'not-a-number'       // Invalid timestamp — rejected
 }, '*');
 ```
@@ -223,13 +223,13 @@ window.parent.postMessage({
 | File | Purpose |
 |------|---------|
 | `index.html` | Parent page with header, iframe embed, and script loading |
-| `parent-library.js` | Message handling, validation, rate limiting, event routing |
+| `fake-usage-meter.js` | Message handling, validation, rate limiting, event routing |
 | `ui-manager.js` | Activity state management, countdown display, header styling |
 | `styles.css` | Styling for parent page (header, container, iframe) |
-| `oreilly-messages.js` | Unminified vendor script (development) |
-| `oreilly-messages.min.js` | Minified vendor script (production) |
+| `messages-from-iframe.js` | Unminified vendor script (development) |
+| `messages-from-iframe.min.js` | Minified vendor script (production) |
 | `docs/index.html` | Vendor iframe content (served from GitHub Pages) |
-| `docs/oreilly-messages.min.js` | Vendor script CDN link |
+| `docs/messages-from-iframe.min.js` | Vendor script CDN link |
 
 ## Getting Started
 
@@ -255,7 +255,7 @@ window.parent.postMessage({
 
 4. **Inspect message flow:**
    - Open DevTools (F12)
-   - Run `window.ActivityMonitor.setDebug(true)`
+   - Run `window.UsageMeter.setDebug(true)`
    - Interact with iframe to see detailed event logs
 
 ### Production Deployment
@@ -295,18 +295,18 @@ Works in all modern browsers supporting:
 - Ensure `allow-scripts` and `allow-same-origin` sandbox attributes are set
 
 ### No messages received?
-- Enable debug mode: `window.ActivityMonitor.setDebug(true)`
+- Enable debug mode: `window.UsageMeter.setDebug(true)`
 - Verify vendor script loaded in iframe (check iframe console)
 - Check message source matches `CONFIG.MESSAGE_SOURCE`
 
 ### Header not changing color?
 - Ensure you're interacting **within the iframe** (not the parent page)
-- Check that `ui-manager.js` loaded before `parent-library.js`
-- Verify both scripts are present: `window.ActivityMonitor` and `window.UIManager` should exist
+- Check that `ui-manager.js` loaded before `fake-usage-meter.js`
+- Verify both scripts are present: `window.UsageMeter` and `window.UIManager` should exist
 
 ### Rate limiting preventing events?
 - Reduce event frequency or increase `MAX_EVENTS_PER_SECOND`
-- Check circuit breaker state: `window.ActivityMonitor.getCircuitBreakerState()`
+- Check circuit breaker state: `window.UsageMeter.getCircuitBreakerState()`
 - Look for runaway event listeners in vendor script
 
 ## Technical Notes
