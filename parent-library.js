@@ -103,7 +103,7 @@
 
     function createDefaultHandlers() {
         registerEventHandler('OREILLY_CLICK_MESSAGE', (details, eventTimestamp) => {
-            log(`User clicked on ${details.targetTag || 'UNKNOWN'} element`, { timestamp: eventTimestamp });
+            log(`User clicked inside iframe`, { timestamp: eventTimestamp });
         });
 
         registerEventHandler('OREILLY_KEYPRESS_MESSAGE', (details, eventTimestamp) => {
@@ -111,15 +111,15 @@
         });
 
         registerEventHandler('OREILLY_SCROLL_MESSAGE', (details, eventTimestamp) => {
-            log(`User scrolled inside iframe`, { scrollX: details.scrollX, scrollY: details.scrollY, timestamp: eventTimestamp });
+            log(`User scrolled inside iframe`, { timestamp: eventTimestamp });
         });
 
         registerEventHandler('OREILLY_MOUSEMOVE_MESSAGE', (details, eventTimestamp) => {
-            log(`Active mouse movement inside iframe`, { timestamp: eventTimestamp });
+            log(`Active mouse movement detected inside iframe`, { timestamp: eventTimestamp });
         });
 
         registerEventHandler('OREILLY_VISIBILITY_CHANGE_MESSAGE', (details, eventTimestamp) => {
-            log(`iFrame visibility changed to: ${details.visibilityState}`, { timestamp: eventTimestamp });
+            log(`iFrame visibility changed`, { timestamp: eventTimestamp });
         });
     }
 
