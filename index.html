@@ -65,31 +65,9 @@
         iframe.addEventListener('load', () => {
             console.log('[App] Iframe loaded successfully');
 
-            // Verify script versions match
-            setTimeout(() => {
-                const parentVersion = window.UsageMeter.getVersion();
-                const iframeVersion = iframe.contentWindow.IframeMessenger?.getVersion?.();
-
-                if (iframeVersion) {
-                    console.log('[App] Version check - Parent:', parentVersion, 'Iframe:', iframeVersion);
-
-                    if (parentVersion === iframeVersion) {
-                        console.log('[App] ✓ Versions match');
-                    } else {
-                        console.warn('[App] ⚠️  Version mismatch! Parent:', parentVersion, 'Iframe:', iframeVersion);
-                        console.warn('[App] This may cause compatibility issues');
-                    }
-                } else {
-                    console.warn('[App] Could not verify iframe messenger version');
-                }
-
-                // Only initialize if iframe is responsive
-                if (iframe.contentWindow.IframeMessenger?.isInitialized?.()) {
-                    console.log('[App] Iframe messenger is initialized and responsive');
-                } else {
-                    console.warn('[App] Iframe messenger not responding');
-                }
-            }, 500);
+            // Note: Cross-origin security prevents accessing iframe.contentWindow
+            // from a different origin. The iframe will initialize independently.
+            // Version verification is built into the iframe's init process.
         });
 
         // Handle iframe load failure (network error, security error, etc.)
