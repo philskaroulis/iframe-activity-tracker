@@ -43,22 +43,17 @@
         </div>
     </div>
 
+    <script src="env-config.js"></script>
     <script src="ui-manager.js"></script>
     <script src="fake-usage-meter.js"></script>
     <script>
         // ============ ENVIRONMENT-BASED IFRAME LOADING ============
         const iframe = document.getElementById('activity-iframe');
 
-        // Detect environment
-        const isDevelopment = window.location.hostname.includes('vercel.app') ||
-                             window.location.hostname === 'localhost';
+        // Load appropriate iframe URL based on environment config
+        const VENDOR_URL = window.EnvConfig.get('VENDOR_URL');
 
-        // Load appropriate iframe URL based on environment
-        const VENDOR_URL = isDevelopment
-            ? window.location.origin + '/docs/index.html'  // Local docs folder (develop branch)
-            : 'https://philskaroulis.github.io/iframe-activity-tracker/index.html';  // GitHub Pages (main branch)
-
-        console.log('[App] Environment:', isDevelopment ? 'Development' : 'Production');
+        console.log('[App] Environment:', window.EnvConfig.environment);
         console.log('[App] Loading iframe from:', VENDOR_URL);
 
         // Handle iframe load success

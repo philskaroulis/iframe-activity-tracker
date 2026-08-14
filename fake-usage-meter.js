@@ -14,7 +14,7 @@
     // ============ CONFIGURATION ============
     const CONFIG = {
         MESSAGE_SOURCE: 'iframe-messages',
-        VENDOR_ORIGIN: 'https://philskaroulis.github.io',
+        VENDOR_ORIGIN: window.EnvConfig ? window.EnvConfig.get('VENDOR_ORIGIN') : 'https://philskaroulis.github.io',
         DEBUG: false,
         MAX_EVENTS_PER_SECOND: 100,
         MAX_TIMESTAMP_DEVIATION_MS: 5000,

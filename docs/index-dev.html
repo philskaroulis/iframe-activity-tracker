@@ -6,9 +6,23 @@
     <!-- Security: Allow scripts from self and GitHub Pages (demonstrates cross-origin capability) -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://philskaroulis.github.io; style-src 'self' 'unsafe-inline'; default-src 'none'; img-src 'self' data:;">
     <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #fafafa; }
+        body { font-family: sans-serif; padding: 20px; background-color: #fafafa; margin: 0; }
         h2 { color: #333; }
         p { color: #666; line-height: 1.6; }
+        .dev-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #2196F3;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-weight: bold;
+            z-index: 9999;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
+        body { padding-bottom: 50px; }
     </style>
 </head>
 <body>
@@ -49,5 +63,7 @@
         script.src = scriptSrc;
         document.body.appendChild(script);
     </script>
+    <!-- Development environment banner -->
+    <div class="dev-banner">🔵 Development Environment</div>
 </body>
 </html>
