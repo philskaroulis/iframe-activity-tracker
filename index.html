@@ -26,6 +26,7 @@
             title="Vendor content iframe for activity tracking"
             sandbox="allow-scripts"
             referrerpolicy="no-referrer"
+            data-parent-origin=""
         ></iframe>
 
         <div class="info-section">
@@ -52,9 +53,14 @@
 
         // Load appropriate iframe URL based on environment config
         const VENDOR_URL = window.EnvConfig.get('VENDOR_URL');
+        const PARENT_ORIGIN = window.EnvConfig.get('PARENT_ORIGIN');
 
         console.log('[App] Environment:', window.EnvConfig.environment);
         console.log('[App] Loading iframe from:', VENDOR_URL);
+        console.log('[App] Parent origin:', PARENT_ORIGIN);
+
+        // Set parent origin attribute so vendor code can read it (vendor-side agnostic config)
+        iframe.dataset.parentOrigin = PARENT_ORIGIN;
 
         // Handle iframe load success
         iframe.addEventListener('load', () => {
