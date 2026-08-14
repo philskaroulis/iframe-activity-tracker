@@ -60,6 +60,9 @@
         console.log('[App] Parent origin:', PARENT_ORIGIN);
 
         // Set parent origin attribute so vendor code can read it (vendor-side agnostic config)
+        if (!PARENT_ORIGIN) {
+            throw new Error('[App] PARENT_ORIGIN is not configured. Check env-config.js');
+        }
         iframe.dataset.parentOrigin = PARENT_ORIGIN;
 
         // Handle iframe load success
